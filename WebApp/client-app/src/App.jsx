@@ -153,18 +153,29 @@ function App() {
                         )}
                       </div>
                     ))}
-
-                    {/* Navigation Buttons */}
                     <div className="d-flex justify-content-between">
-                      <button type="button" className="btn btn-secondary" onClick={prevStep} disabled={currentStep === 0}>Back</button>
-                      <button type="button" className="btn btn-primary" onClick={nextStep}>
-                        {currentStep < steps.length - 1 ? 'Next' : 'Predict Price'}
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={prevStep}
+                        disabled={currentStep === 0}
+                      >
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={nextStep}
+                      >
+                        {currentStep === steps.length - 1 ? "Predict Price" : "Next"}
                       </button>
                     </div>
-
-                    {/* Display predicted price */}
-                    {predictedPrice && <div className="mt-4 text-white">{predictedPrice}</div>}
                   </form>
+                  {predictedPrice && (
+                    <div className="mt-4 text-center">
+                      <h5 className="text-warning">{predictedPrice}</h5>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
