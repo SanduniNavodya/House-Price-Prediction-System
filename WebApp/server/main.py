@@ -17,10 +17,10 @@ def predict_price():
 
     # Check if all required fields are present in the incoming JSON
     required_fields = [
-        'totalBsmtSF', 'firstFlrSF', 'grLivArea', 'fullBath', 'halfBath',
-        'bedroomAbvGr', 'kitchenQual', 'garageType', 'garageCars', 'pavedDrive',
-        'heating', 'centralAir', 'saleType', 'yearBuilt', 'yearRemodAdd', 
-        'roofStyle', 'exterQual', 'bsmtQual'
+        'LotArea', 'HouseStyle', 'totalsf', 'totalporchsf', 'totalarea',
+        'OverallQual', 'CentralAir', 'totalbaths', 'BedroomAbvGr',
+        'KitchenAbvGr', 'TotRmsAbvGrd', 'Fireplaces', 'GarageCars',
+        'GarageType', 'SaleType'
     ]
     
     for field in required_fields:
@@ -30,24 +30,20 @@ def predict_price():
     try:
         # Extract and convert input values to appropriate types
         features = [
-            float(data['totalBsmtSF']),
-            float(data['firstFlrSF']),
-            float(data['grLivArea']),
-            int(data['fullBath']),
-            int(data['halfBath']),
-            int(data['bedroomAbvGr']),
-            float(data['kitchenQual']),  # Assuming this is a numerical representation
-            float(data['garageType']),   # Assuming this is a numerical representation
-            int(data['garageCars']),
-            float(data['pavedDrive']),   # Assuming this is a numerical representation
-            float(data['heating']),      # Assuming this is a numerical representation
-            float(data['centralAir']),   # Assuming this is a numerical representation
-            float(data['saleType']),     # Assuming this is a numerical representation
-            int(data['yearBuilt']),
-            int(data['yearRemodAdd']),
-            float(data['roofStyle']),    # Assuming this is a numerical representation
-            float(data['exterQual']),    # Assuming this is a numerical representation
-            float(data['bsmtQual'])      # Assuming this is a numerical representation
+            float(data['LotArea']),
+            float(data['totalsf']),
+            float(data['totalporchsf']),
+            float(data['totalarea']),
+            float(data['OverallQual']),
+            1.0 if data['CentralAir'] == 'Yes' else 0.0,  # Convert Yes/No to 1/0
+            float(data['totalbaths']),
+            float(data['BedroomAbvGr']),
+            float(data['KitchenAbvGr']),
+            float(data['TotRmsAbvGrd']),
+            float(data['Fireplaces']),
+            float(data['GarageCars']),
+            1.0 if data['GarageType'] == 'Attached' else 0.0,  # Convert Attached/Detached to 1/0
+            1.0 if data['SaleType'] == 'New' else 0.0  # Convert New/Other to 1/0
         ]
 
         # Convert features list to a numpy array and reshape to 2D array for model prediction
