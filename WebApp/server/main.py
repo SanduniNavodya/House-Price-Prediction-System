@@ -1,21 +1,20 @@
-from flask import Flask, jsonify, request  # Import necessary modules from Flask
-from flask_cors import CORS  # Import CORS for handling cross-origin requests
-import joblib  # Import joblib for loading the trained model
-import numpy as np  # Import numpy for numerical operations
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import joblib
+import numpy as np
 
-# Initialize Flask app
 app = Flask(__name__)
-CORS(app, origins='*')  # Enable CORS for all origins
+CORS(app)
 
-model = joblib.load('predictor.pickle')  # Load the trained model from the pickle file
+# Load the trained model (make sure this file exists)
+model = joblib.load('Predict.pickle')  # Check that Predict.pickle is in the right location
 
 # Define the /api/predict route for POST requests
 @app.route('/api/predict', methods=['POST'])
 def predict_price():
-    # Extract JSON data from the request
     data = request.get_json()
 
-    # Check if all required fields are present in the incoming JSON
+    # Required fields
     required_fields = [
         'LotArea', 'HouseStyle', 'totalsf', 'totalporchsf', 'totalarea',
         'OverallQual', 'CentralAir', 'totalbaths', 'BedroomAbvGr',
@@ -23,50 +22,63 @@ def predict_price():
         'GarageType', 'SaleType'
     ]
     
+    # Check if all fields are present
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Missing field: {field}'}), 400
-    
+
     try:
-        # Extract and convert input values to appropriate types
-        features = [
+        # Handle one-hot encoding for HouseStyle
+        house_style = data['HouseStyle']
+
+        # Initialize one-hot encoded variables
+        house_style_1story = 0
+        house_style_2story = 0
+
+        # Set the one-hot encoded variables based on the selected house style
+        if house_style == '1Story':
+            house_style_1story = 1
+        elif house_style == '2Story':
+            house_style_2story = 1
+
+        # Binary encoding for CentralAir
+        central_air = 1 if data['CentralAir'] == 'Yes' else 0
+
+        # Binary encoding for GarageType (assuming only 'Attached' matters)
+        garage_type_attached = 1 if data['GarageType'] == 'Attached' else 0
+
+        # Binary encoding for SaleType (assuming only 'New' matters)
+        sale_type_new = 1 if data['SaleType'] == 'New' else 0
+
+        # Convert incoming data to appropriate format, including one-hot encoded values
+        features = np.array([
             float(data['LotArea']),
             float(data['totalsf']),
             float(data['totalporchsf']),
             float(data['totalarea']),
             float(data['OverallQual']),
-            1.0 if data['CentralAir'] == 'Yes' else 0.0,  # Convert Yes/No to 1/0
+            central_air,
             float(data['totalbaths']),
             float(data['BedroomAbvGr']),
             float(data['KitchenAbvGr']),
             float(data['TotRmsAbvGrd']),
             float(data['Fireplaces']),
             float(data['GarageCars']),
-            1.0 if data['GarageType'] == 'Attached' else 0.0,  # Convert Attached/Detached to 1/0
-            1.0 if data['SaleType'] == 'New' else 0.0  # Convert New/Other to 1/0
-        ]
+            garage_type_attached,
+            sale_type_new,
+            house_style_1story,
+            house_style_2story
+        ]).reshape(1, -1)  # Reshape to match model input
 
-        # Convert features list to a numpy array and reshape to 2D array for model prediction
-        features_array = np.array([features])
+        # Make prediction
+        predicted_price = model.predict(features)[0]
 
-        # Predict the house price using the loaded model
-        prediction = model.predict(features_array)[0]
-
-        # Return the predicted price as a JSON response
-        return jsonify({'predicted_price': prediction}), 200
-
+        # Return the predicted price
+        return jsonify({'predicted_price': round(predicted_price, 2)})
+    
     except Exception as e:
-        # If an error occurs, return a 500 error with the exception message
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Error during prediction: {str(e)}'}), 500
 
-# Test route to verify API is working
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    return jsonify({
-        'users': ['user1', 'user2', 'user3']
-    })
-
-# Main entry point for the Flask app
+# Run the Flask app
 if __name__ == '__main__':
-    # Run the Flask app on port 8080 in debug mode
     app.run(debug=True, port=8080)
