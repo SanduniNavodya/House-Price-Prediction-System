@@ -1,13 +1,14 @@
+import pandas as pd
+import numpy as np
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import joblib
-import numpy as np
 
 app = Flask(__name__)
 CORS(app)
 
-# Load the trained model (make sure this file exists)
-model = joblib.load('Predict.pickle')  # Check that Predict.pickle is in the right location
+# Load the trained model from the pickle file
+model = joblib.load('Predict_ridge_new.pickle')
 
 # Define the /api/predict route for POST requests
 @app.route('/api/predict', methods=['POST'])
@@ -50,25 +51,25 @@ def predict_price():
         # Binary encoding for SaleType (assuming only 'New' matters)
         sale_type_new = 1 if data['SaleType'] == 'New' else 0
 
-        # Convert incoming data to appropriate format, including one-hot encoded values
-        features = np.array([
-            float(data['LotArea']),
-            float(data['totalsf']),
-            float(data['totalporchsf']),
-            float(data['totalarea']),
-            float(data['OverallQual']),
-            central_air,
-            float(data['totalbaths']),
-            float(data['BedroomAbvGr']),
-            float(data['KitchenAbvGr']),
-            float(data['TotRmsAbvGrd']),
-            float(data['Fireplaces']),
-            float(data['GarageCars']),
-            garage_type_attached,
-            sale_type_new,
-            house_style_1story,
-            house_style_2story
-        ]).reshape(1, -1)  # Reshape to match model input
+        # Create a DataFrame for the features with proper column names
+        features = pd.DataFrame({
+            'LotArea': [float(data['LotArea'])],
+            'OverallQual': [float(data['OverallQual'])],
+            'CentralAir': [central_air],
+            'BedroomAbvGr': [float(data['BedroomAbvGr'])],
+            'KitchenAbvGr': [float(data['KitchenAbvGr'])],
+            'TotRmsAbvGrd': [float(data['TotRmsAbvGrd'])],
+            'Fireplaces': [float(data['Fireplaces'])],
+            'GarageCars': [float(data['GarageCars'])],
+            'totalsf': [float(data['totalsf'])],
+            'totalarea': [float(data['totalarea'])],
+            'totalbaths': [float(data['totalbaths'])],
+            'totalporchsf': [float(data['totalporchsf'])],
+            'HouseStyle_1Story': [house_style_1story],
+            'HouseStyle_2Story': [house_style_2story],
+            'SaleType_New': [sale_type_new],
+            'GarageType_Attchd': [garage_type_attached]
+        })
 
         # Make prediction
         predicted_price = model.predict(features)[0]
@@ -82,3 +83,4 @@ def predict_price():
 # Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
+
