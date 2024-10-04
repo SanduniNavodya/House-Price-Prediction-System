@@ -25,14 +25,14 @@ function App() {
     {
       title: "General Property Information", fields: [
         { label: "Lot Area (sq ft)", value: LotArea, setter: setLotArea, type: "number" },
-        { label: "House Style", value: HouseStyle, setter: setHouseStyle, type: "select", options: [{ value: "", label: "Select house style" }, { value: "1Story", label: "1 Story" }, { value: "2Story", label: "2 Story" }] }
+        { label: "House Style", value: HouseStyle, setter: setHouseStyle, type: "select", options: [{ value: "", label: "Select house style" }, { value: "1Story", label: "2 Story" }, { value: "2Story", label: "1 Story" }] }
       ]
     },
     {
       title: "Size and Structure", fields: [
         { label: "Total Square Footage (sq ft)", value: totalsf, setter: setTotalSF, type: "number" },
         { label: "Total Porch Area (sq ft)", value: totalporchsf, setter: setTotalPorchSF, type: "number" },
-        { label: "Total Area (sq ft)", value: totalarea, setter: setTotalArea, type: "number" },
+        { label: "Living Area (sq ft)", value: totalarea, setter: setTotalArea, type: "number" },
         { label: "Overall Quality", value: OverallQual, setter: setOverallQual, type: "select", options: [{ value: "", label: "Select overall quality" }, { value: 10, label: "Very Excellent" }, { value: 9, label: "Excellent" }, { value: 8, label: "Very Good" }, { value: 7, label: "Good" }, { value: 6, label: "Above Average" }, { value: 5, label: "Average" }, { value: 4, label: "Below Average" }, { value: 3, label: "Fair" }, { value: 2, label: "Poor" }, { value: 1, label: "Very Poor" }] }
       ]
     },
@@ -77,6 +77,11 @@ function App() {
         // Check for empty number fields
         if (field.type === 'number' && field.value === '') {
           currentErrors[field.label] = `${field.label} is required`;
+          isValid = false;
+        }
+        // Check for negative values in number fields
+        if (field.type === 'number' && field.value < 0) {
+          currentErrors[field.label] = `${field.label} cannot be negative`;
           isValid = false;
         }
       });
@@ -144,7 +149,7 @@ function App() {
         <div className="container">
           {/* Title */}
           <div className="text-center text-white mb-5">
-            <h1 className="display-4" style={{ fontFamily: 'Georgia, serif', fontSize: '3rem', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'capitalize' }}>
+            <h1 className="display-4" style={{ fontFamily: 'Georgia, serif', fontSize: '3rem', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'capitalize', paddingTop:"15px" }}>
               House Price Prediction
             </h1>
             <p className="lead">Enter the details below to predict the house price</p>
@@ -206,6 +211,7 @@ function App() {
                                       className="form-control"
                                       value={field.value}
                                       onChange={(e) => field.setter(e.target.value)}
+                                      min="0" // Prevent negative numbers
                                     />
                                   )}
                                   {errors[field.label] && (
@@ -291,3 +297,4 @@ function App() {
 }
 
 export default App;
+
