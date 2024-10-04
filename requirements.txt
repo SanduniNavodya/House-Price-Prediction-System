@@ -6,9 +6,10 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 joblib==1.2.0
 MarkupSafe==2.1.2
-numpy==1.21.6
+numpy>=1.24.0  # Updated to a version compatible with Python 3.9 or higher
 pickle-mixin==1.0.2
-scikit-learn==1.0.2
-scipy==1.7.3
+scikit-learn==1.0.2  # Ensure compatibility with updated numpy
+scipy==1.9.0  # Updated to ensure compatibility with numpy >= 1.24.0
 threadpoolctl==3.1.0
 Werkzeug==2.2.3
+
