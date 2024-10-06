@@ -1,4 +1,4 @@
-
+import os
 import pandas as pd
 import numpy as np
 from flask import Flask, jsonify, request
@@ -8,8 +8,9 @@ import joblib
 app = Flask(__name__)
 CORS(app)
 
-# Load the trained model from the pickle file
-model = joblib.load('Predict_ridge_new.pickle')
+# Load the trained model from the environment variable path
+model_path = os.getenv('MODEL_PATH', 'Predict_ridge_new.pickle')
+model = joblib.load(model_path)
 
 # Define the /api/predict route for POST requests
 @app.route('/api/predict', methods=['POST'])
@@ -83,4 +84,6 @@ def predict_price():
 
 # Run the Flask app
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    # Use the port set by Render
+    port = int(os.getenv('PORT', 8080))
+    app.run(debug=True, port=port)
